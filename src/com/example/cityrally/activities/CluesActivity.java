@@ -33,28 +33,17 @@ public class CluesActivity extends ActionBarActivity {
 		
 		cluesListView = (ListView) findViewById(R.id.cluesListView);
 		
-		
 		DatabaseHandler db = new DatabaseHandler(this);
+		
+		//will get Clues of challenges which had been solved and not given up
 		List<String> clues = db.getSolvedClues(false); 
-		
-		
-		//String[] myStringArray= (String[]) clues.toArray(); //{"a","b","c"};
+	
 	    ArrayAdapter adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, clues); 
 	    
-	   //to tell what to list vew
+	   //to tell what to show in the listView
 	   
 	    cluesListView.setAdapter(adapter);
-	   //Handling click events
-	        
-	   	//cluesListView.setOnItemClickListener(new OnItemClickListener() {
-	    
-	   		//public void onItemClick(AdapterView<?> myAdapter, View myView, int myItemInt, long mylng) {
-	        
-	   		//	textView.setText(items[myItemInt]); 
-	   			
-	   			//}
-	        //});
-	        
+	
 		//make a list and initialize isSolved data. 
 	    //Create a method in DBheandler getSolvedCheckPoints().
 		

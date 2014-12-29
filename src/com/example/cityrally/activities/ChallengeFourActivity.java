@@ -58,7 +58,6 @@ public class ChallengeFourActivity extends ChallengeActivity {
 					
 				}
 				
-				
 			}
 		});
 		giveUpBtn.setOnClickListener(new OnClickListener() {

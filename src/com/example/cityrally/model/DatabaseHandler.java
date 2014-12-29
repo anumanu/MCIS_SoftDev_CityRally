@@ -11,15 +11,15 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
 	// Database Version
-    private static int DATABASE_VERSION = 21;
+    private static int DATABASE_VERSION = 22;
  
     // Database Name
     private static final String DATABASE_NAME = "CheckPointDB";
  
-    // Contacts table name
+    // Challenges table name
     private static final String TABLE_CHECKPOINT = "CheckPoint";
     
-    // Contacts Table Columns names
+    // Challenges Table Columns names
     private static final String KEY_ID = "s";
     private static final String KEY_LATITUDE = "latitude";
     private static final String KEY_LONGITUDE = "longitude";
@@ -58,7 +58,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	
 	//CRUD
 	
-	// Adding new contact
+	// Adding new Challenge
 	public void addCheckPoint(CheckPoint checkPoint) {
 		
 		SQLiteDatabase db = this.getWritableDatabase();
@@ -78,7 +78,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	   
 	}
 	 
-	// Getting single contact
+	// Getting single Challenge
 	public CheckPoint getCheckPoint(int id) {
 		
 		SQLiteDatabase db = this.getReadableDatabase();
@@ -88,13 +88,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	            new String[] { String.valueOf(id) }, null, null, null, null);
 	    if (cursor != null)
 	        cursor.moveToFirst();
-	 
-	    // Double.parseValue()
-	    // contact.setID(Integer.parseInt(cursor.getString(0)));
+	    
 	    int c_id = cursor.getInt(0);
-	    //Double.parseDouble(cursor.getString(0));
 	    double c_latitude = Double.parseDouble(cursor.getString(1));
-	    //double c_longitude = cursor.getDouble(2);
 	    double c_longitude = Double.parseDouble(cursor.getString(2));
 	    String c_challangeID = cursor.getString(3);
 	    String c_clue = cursor.getString(4);
@@ -106,7 +102,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	    return checkPoint;
 	}
 	 
-	// Getting All Contacts
+	// Getting All Challenges
 	public List<CheckPoint> getAllCheckPoint() {
 		List<CheckPoint> checkPointList = new ArrayList<CheckPoint>();
 		
@@ -131,12 +127,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 checkPoint.setGiveUp(cursor.getInt(6) == 1);
                 
                 
-                // Adding contact to list
+                // Adding Challenge to list
                 checkPointList.add(checkPoint);
             } while (cursor.moveToNext());
         }
  
-        // return contact list
+        // return Challenge list
         return checkPointList;
 	}
 	 
@@ -187,7 +183,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return count;
 	}
 	
-	// Updating single contact
+	// Updating single Challenge
 	public int updateCheckPoint(CheckPoint checkPoint) {
 		
 		SQLiteDatabase db = this.getWritableDatabase();
@@ -205,7 +201,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 new String[] { String.valueOf(checkPoint.getId()) });
 	}
 	 
-	// Deleting single contact
+	// Deleting single Challenge
 	public void deleteCheckPoint(CheckPoint checkPoint) {
 		
 		SQLiteDatabase db = this.getWritableDatabase();

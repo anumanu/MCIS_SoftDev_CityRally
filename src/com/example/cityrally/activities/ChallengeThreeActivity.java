@@ -41,9 +41,9 @@ public class ChallengeThreeActivity extends ChallengeActivity implements OnGestu
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_challenge_three);
 		
-	
 		giveUpBtn = (Button) findViewById(R.id.btnGiveUp);
 		
+		// defining a gesture
 		gLibrary = GestureLibraries.fromRawResource(this, R.raw.gestures);
         if (!gLibrary.load()) {
             finish();
@@ -69,11 +69,10 @@ public class ChallengeThreeActivity extends ChallengeActivity implements OnGestu
             gesture) {
         ArrayList<Prediction> predictions =
                 gLibrary.recognize(gesture);
-
-     //   if (predictions.size() > 0 && predictions.get(0).score > 1.0) {
+        
+        // checking if the painted gesture is similar to the gesture named House from the list 
         if (predictions.get(0).name.equals("HOUSE")) {
-            //String action = predictions.get(0).name;
-           
+        	
             completeChallenge();
 			showAlertDialogSolved();
         }
@@ -81,7 +80,6 @@ public class ChallengeThreeActivity extends ChallengeActivity implements OnGestu
         	Toast.makeText(ChallengeThreeActivity.this, "Your answer is wrong.", Toast.LENGTH_SHORT).show();
         }
         
-       
     }
 	
 

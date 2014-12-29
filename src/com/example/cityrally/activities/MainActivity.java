@@ -15,6 +15,8 @@ import com.google.android.gms.internal.db;
 
 import android.support.v7.app.ActionBarActivity;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationListener;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -43,9 +45,8 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-       
-    	//final DatabaseHandler db = new DatabaseHandler(this);
         
+        // initialise the Database
         initDatabase();
         
         cluesCount = (TextView) findViewById(R.id.scoreText);
@@ -78,7 +79,7 @@ public class MainActivity extends ActionBarActivity {
 			
 			@Override
 			public void onClick(View v) {
-				
+				// will open Mistery Intent only if all challenges had been solved or given up
 				if(AllChallangesAreSolved()) {
 		    			misteryIntent = new Intent(getApplicationContext(), MisteryActivity.class);
 		    			startActivity(misteryIntent);
@@ -92,7 +93,6 @@ public class MainActivity extends ActionBarActivity {
         
     }
  
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -131,17 +131,18 @@ public class MainActivity extends ActionBarActivity {
 	    	db.addCheckPoint(new CheckPoint(4, 49.626244,  6.158729, "c4", "- It was named after one of the Grand Duke of Luxembourg. -", false, false));  
 	     
     	}
-        // Reading all contacts
+        // Reading all checkpoints
         Log.d("Reading: ", "Reading all CheckPoints.."); 
         List<CheckPoint> checkPoint = db.getAllCheckPoint();       
          
         for (CheckPoint cn : checkPoint) {
             String log = "Id: "+cn.getId()+" ,Challange: " + cn.getChallangeID() + " ,Latitude: " + cn.getLatitude() + " ,Longitude: " + cn.getLongitude() + " ,Clue: " + cn.getClue() + " ,Solved: " + cn.isSolved();
-                // Writing Contacts to log
-        Log.d("Challange: ", log);
+        // Writing Contacts to log
+        Log.d("Challenge: ", log);
         }
     }
     
+    // will return true if all challenges are solved
     private boolean AllChallangesAreSolved(){
     	DatabaseHandler db = new DatabaseHandler(this);
     	
@@ -151,6 +152,7 @@ public class MainActivity extends ActionBarActivity {
 		return false;
     }
     
+    // will show the total number and the number of solved/gave up challenges on the mane page
     private void updateSolvedCluesCount() {
     	DatabaseHandler db = new DatabaseHandler(this);
 		//List<String> clues = db.getSolvedClues(); 
@@ -158,4 +160,6 @@ public class MainActivity extends ActionBarActivity {
     	
 		cluesCount.setText(clues + "/4");
     }
+    
+    
 }

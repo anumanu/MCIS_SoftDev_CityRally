@@ -12,30 +12,21 @@ import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.Toast;
 
 import android.support.v4.app.FragmentActivity;
 
 import com.example.cityrally.R;
-import com.example.cityrally.R.id;
-import com.example.cityrally.R.layout;
-import com.example.cityrally.R.menu;
 import com.example.cityrally.model.CheckPoint;
 import com.example.cityrally.model.DatabaseHandler;
-import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -43,9 +34,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-
 
 public class MapActivity extends FragmentActivity implements LocationListener {
 
@@ -65,13 +54,12 @@ public class MapActivity extends FragmentActivity implements LocationListener {
 	protected boolean gps_enabled,network_enabled;
 	
 	private Location lastKnownLocation;
-	////end
-	public LocationClient mLocationClient;
 	
-	//Mock location
-	private LocationManager lm;
+	//private LocationManager lm;
 	
+	// will add all Markers in the HashMap 
 	private Map<Marker, Class<?>> allMarkersForClass = new HashMap<Marker, Class<?>>();
+	//will add all checkPoints in the HashMap
 	private HashMap<Marker, CheckPoint> allMarkersForCheckPoint = new HashMap<Marker, CheckPoint>();
 	
 	@Override
@@ -79,27 +67,6 @@ public class MapActivity extends FragmentActivity implements LocationListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_map);
 		
-		//locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		//locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, (LocationListener) this);
-		
-		//---
-		LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);        
-
-		lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new LocationListener() {       
-		            @Override
-		            public void onStatusChanged(String provider, int status, Bundle extras) {}
-		            @Override
-		            public void onProviderEnabled(String provider) {}
-		            @Override
-		            public void onProviderDisabled(String provider) {}
-		            @Override
-		            public void onLocationChanged(Location location) {}
-		});
-		            
-		/* Set a mock location for debugging purposes */
-		setMockLocation(6.130872, 49.610465, 500);
-		//---
-	    
 		mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
 	    map = mapFragment.getMap();
 	    if (map == null) {
@@ -110,6 +77,7 @@ public class MapActivity extends FragmentActivity implements LocationListener {
 	    final DatabaseHandler db = new DatabaseHandler(this);
 		map.setOnMarkerClickListener(new OnMarkerClickListener() {
 			
+			// on click on the marker it will do following actions:
 			@Override
 			public boolean onMarkerClick (Marker myMarker) {
 				
@@ -117,19 +85,27 @@ public class MapActivity extends FragmentActivity implements LocationListener {
 		
 				final CheckPoint checkPoint = allMarkersForCheckPoint.get(myMarker);
 				
+				// if the checkPoint (Challenge) is solved
 				if( checkPoint.isSolved()) {
 					Toast.makeText(MapActivity.this, "The challenge is already solved!", Toast.LENGTH_SHORT).show();
 					
 				} else {
-					
+					// checkPoint (next Challenge) is unlocked if and only if the previous challenge is already solved/given up
 					if ( db.isCheckPointUnLocked(checkPoint) ) {
-						if(isCheckPointClose(checkPoint)){
+						
+						// if we un-comment the code bellow, we can check whether the Marker is: close up to 100m to the Challenge activity,
+						// which wants to solve the player, otherwise it will offer to show the direction
+						
+						// if(isCheckPointClose(checkPoint)){
+						
 							Intent intent = new Intent(MapActivity.this, classForMarker);			
 							intent.putExtra("checkPointID", checkPoint.getId());
 							startActivity(intent);	
-						} else {
-							showAlertMsgForDirection(checkPoint);
-						}
+							
+						//} else {
+						//	showAlertMsgForDirection(checkPoint);
+						//}
+							
 					} else {
 						Toast.makeText(MapActivity.this, "This challenge is locked!", Toast.LENGTH_SHORT).show();
 					}
@@ -139,30 +115,13 @@ public class MapActivity extends FragmentActivity implements LocationListener {
 			}
 		});
 	
-		
-		/*
-		map.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
-		
-			@Override
-			public void onInfoWindowClick(Marker myMarker) {
-				Class<?> classForMarker = allMarkersForClass.get(myMarker); 
-				
-				//CheckPoint checkPoint = allMarkersForCheckPoint.get(myMarker);
-				//if( ! checkPoint.isSolved() ) {
-					Intent intent = new Intent(MapActivity.this, classForMarker);			
-					//intent.putExtra("checkPointID", checkPoint.getId());
-					startActivity(intent);
-			//	} else {
-					// Show Alert message
-				//}
-			}
-		});
-		*/
+		//current location
+		map.setMyLocationEnabled(true);
+		LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+		lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+
 	} 
 	
-
-	  
-
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -184,7 +143,6 @@ public class MapActivity extends FragmentActivity implements LocationListener {
 	
 	@Override
 	protected void onResume() {
-		System.out.println("MAP ON RESUME --------");
 		mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
 	    map = mapFragment.getMap();
 	    if (map == null) {
@@ -201,6 +159,7 @@ public class MapActivity extends FragmentActivity implements LocationListener {
 		super.onResume();
 	}
 	
+	// adding Markers(checkPoints) on the map
 	private void addMarkerToMap() {
 		
 		DatabaseHandler db = new DatabaseHandler(this);
@@ -222,9 +181,11 @@ public class MapActivity extends FragmentActivity implements LocationListener {
 			
 			if ( previousPoint != null) {
 				if ( db.isCheckPointUnLocked(cn) ) {
+					// setting the color for solved checkpoint 
 					map.addPolyline(new PolylineOptions().add(previousPoint, Markers ).width(5).color(Color.GREEN));
 				}
 				else {
+					// setting the color for unsolved checkpoint 
 					map.addPolyline(new PolylineOptions().add(previousPoint, Markers ).width(5).color(Color.RED));
 				}
 			} 
@@ -243,24 +204,26 @@ public class MapActivity extends FragmentActivity implements LocationListener {
 		    Marker myMarker = map.addMarker(mo);
 		    
 		    if ( cn.isSolved() ) {
-		    	System.out.println("first isSolved value is: " + cn.isSolved());
 		    	
 		    	this.allMarkersForCheckPoint.put(myMarker, cn);
 			} else {
-		    
+				
+					// if CID = c1, open ChallangeOneActivity activity
 			    if ( cn.getChallangeID().equals("c1")) {
-					
 			    	this.allMarkersForClass.put(myMarker, ChallangeOneActivity.class);
 			    	this.allMarkersForCheckPoint.put(myMarker, cn);
-			    	
+			    
+			    	// if CID = c2, open ChallengeTwoActivity activity
 			    } else if ( cn.getChallangeID().equals("c2") ) {
 			    	this.allMarkersForClass.put(myMarker, ChallengeTwoActivity.class);
 			    	this.allMarkersForCheckPoint.put(myMarker, cn);
 			    	
+			    	// if CID = c3, open ChallengeThreeActivity activity
 			    } else if ( cn.getChallangeID().equals("c3") ) {
 					this.allMarkersForClass.put(myMarker, ChallengeThreeActivity.class);
 					this.allMarkersForCheckPoint.put(myMarker, cn);
 					
+					// if CID = c4, open ChallengeFourActivity activity
 			    } else if ( cn.getChallangeID().equals("c4") ) {
 					this.allMarkersForClass.put(myMarker, ChallengeFourActivity.class);
 					this.allMarkersForCheckPoint.put(myMarker, cn);
@@ -275,14 +238,9 @@ public class MapActivity extends FragmentActivity implements LocationListener {
 		     
 		}
 	}
-
-	
 		public void onLocationChanged(Location location) {
 			
 			this.lastKnownLocation = location;  
-			
-			
-			
 			
 		}
 	
@@ -298,6 +256,7 @@ public class MapActivity extends FragmentActivity implements LocationListener {
 			Log.d("Latitude","status");
 		}
 		
+		// checks whether the distance between the player and the challenge that he is going to solve is less than 100 meters? 
 		public boolean isCheckPointClose(CheckPoint checkPoint) {
 			boolean isClose = false;
 			
@@ -307,19 +266,17 @@ public class MapActivity extends FragmentActivity implements LocationListener {
 			
 			if ( this.lastKnownLocation != null ) {
 				double distance = this.lastKnownLocation.distanceTo(checkPointLocation);
-				System.out.println("DISTANCE is ---------------" + distance);
+				
 				isClose = distance <= 100; 
 			}
 			
 			return isClose;
 		}
 		
+		// suggest to give a direction from user's current location to the challenge which he is going to solve.
 		public void showAlertMsgForDirection(final CheckPoint checkPoint){
 			
 		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
- 
-			// set title
-			
  
 			// set dialog message
 			alertDialogBuilder
@@ -347,34 +304,4 @@ public class MapActivity extends FragmentActivity implements LocationListener {
 				// show it
 				alertDialog.show();
 		}
-		private void setMockLocation(double latitude, double longitude, float accuracy) {
-		    lm.addTestProvider (LocationManager.GPS_PROVIDER,
-		                        "requiresNetwork" == "",
-		                        "requiresSatellite" == "",
-		                        "requiresCell" == "",
-		                        "hasMonetaryCost" == "",
-		                        "supportsAltitude" == "",
-		                        "supportsSpeed" == "",
-		                        "supportsBearing" == "",
-		                         android.location.Criteria.POWER_LOW,
-		                         android.location.Criteria.ACCURACY_FINE);      
-
-		    Location newLocation = new Location(LocationManager.GPS_PROVIDER);
-
-		    newLocation.setLatitude(latitude);
-		    newLocation.setLongitude(longitude);
-		    newLocation.setAccuracy(accuracy);
-
-		    lm.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true);
-
-		    lm.setTestProviderStatus(LocationManager.GPS_PROVIDER,
-		                             LocationProvider.AVAILABLE,
-		                             null,System.currentTimeMillis());    
-		  
-		    lm.setTestProviderLocation(LocationManager.GPS_PROVIDER, newLocation);      
-
-		}
-		
 }
-
-

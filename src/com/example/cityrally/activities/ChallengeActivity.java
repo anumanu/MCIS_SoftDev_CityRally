@@ -26,8 +26,6 @@ public class ChallengeActivity extends ActionBarActivity {
 		super.onCreate(savedInstanceState);
 		
 		int cid = getIntent().getIntExtra("checkPointID", 0);
-	
-		System.out.println("We get following input: ------" + cid);
 		
 		this.checkPointID = cid;
 	}
@@ -51,10 +49,12 @@ public class ChallengeActivity extends ActionBarActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
+	// returns checkPoint ID
 	public int getCheckPointID() {
 		return checkPointID;
 	}
 	
+	//will set isSolved from false to true in Database
 	public void completeChallenge() {
 		DatabaseHandler db = new DatabaseHandler(this);
 		
@@ -64,9 +64,10 @@ public class ChallengeActivity extends ActionBarActivity {
 		
 		db.updateCheckPoint(checkPoint);
 	
-		System.out.println("Challenge completed: " + checkPoint.getId());
+		//System.out.println("Challenge completed: " + checkPoint.getId());
 	}
 	
+	//will set isSolved from false to true and also isGiveUp from false to true
 	public void giveUpTheChallenge() {
 		DatabaseHandler db = new DatabaseHandler(this);
 		
@@ -80,6 +81,7 @@ public class ChallengeActivity extends ActionBarActivity {
 		System.out.println("You gave up the challenge: " + checkPoint.getId());
 	}
 	
+	// building a message
 	private void showAlertDialog(String title, String message) {
 		AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
 		builder1.setTitle(title);
@@ -96,6 +98,7 @@ public class ChallengeActivity extends ActionBarActivity {
 		alert11.show();
 	}
 	
+	// message if the challenge is solved
 	public void showAlertDialogSolved() {
 		DatabaseHandler db = new DatabaseHandler(this);		
 		CheckPoint checkPoint = db.getCheckPoint(this.checkPointID);
@@ -106,58 +109,12 @@ public class ChallengeActivity extends ActionBarActivity {
 		this.showAlertDialog(title, message);
 	}
 	
+	// message if the challenge is give up
 	public void showAlertDialogGaveUp() {
 		String title = ":(";
 		String message = "No clues for those who give up!";
 		
 		this.showAlertDialog(title, message);
 	}
-	/*
-	public void showAlertDialog(){
-		
-		DatabaseHandler db = new DatabaseHandler(this);
-		
-		CheckPoint checkPoint = db.getCheckPoint(this.checkPointID);
-		
-		AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
-		builder1.setTitle("Congratulation!");
-		builder1.setMessage("You guessed the right answer. The clue is:\n"+ checkPoint.getClue());
-		builder1.setCancelable(true);
-		builder1.setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-		    public void onClick(DialogInterface dialog, int id) {
-		        
-		    	//dialog.cancel();
-		    	//intent = new Intent();
-		    	setResult(RESULT_OK, intent);
-		        finish();
-		    }
-		});
-
-		AlertDialog alert11 = builder1.create();
-		alert11.show();
-	}
 	
-	public void showAlertDialogNoClue(){
-		
-		DatabaseHandler db = new DatabaseHandler(this);
-		
-		CheckPoint checkPoint = db.getCheckPoint(this.checkPointID);
-		
-		AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
-		builder1.setTitle(":( ");
-		builder1.setMessage("No clues for those who give up!");
-		builder1.setCancelable(true);
-		builder1.setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-		    public void onClick(DialogInterface dialog, int id) {
-		        
-		    	//dialog.cancel();
-		    	//intent = new Intent();
-		    	setResult(RESULT_OK, intent);
-		        finish();
-		    }
-		});
-
-		AlertDialog alert11 = builder1.create();
-		alert11.show();
-	}*/
 }
